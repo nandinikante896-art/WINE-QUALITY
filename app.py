@@ -10,8 +10,25 @@ st.set_page_config(
 )
 
 # Load trained model
-with open("model.pkl", "rb") as file:
-    model = pickle.load(file)
+
+from pathlib import Path
+import pickle
+import streamlit as st
+import numpy as np
+
+BASE_DIR = Path(__file__).resolve().parent
+
+@st.cache_resource
+def load_model_and_scaler():
+    with open(BASE_DIR / "wine_model.pkl", "rb") as file:
+        model = pickle.load(file)
+
+    with open(BASE_DIR / "scaler.pkl", "rb") as file:
+        scaler = pickle.load(file)
+
+    return model, scaler
+
+model, scaler = load_model_and_scaler()
 
 # Title
 st.title("🍷 Wine Quality Prediction App")
