@@ -48,20 +48,38 @@ sulphates = st.number_input("Sulphates", 0.0, 2.0, 0.56)
 alcohol = st.number_input("Alcohol (%)", 8.0, 15.0, 9.4)
 
 # Predict button
+
 if st.button("🔍 Predict Wine Quality"):
-    input_data = np.array([[fixed_acidity, volatile_acidity, citric_acid,
-                             residual_sugar, chlorides, free_sulfur_dioxide,
-                             total_sulfur_dioxide, density, pH,
-                             sulphates, alcohol]])
+    input_data = np.array([[
+        fixed_acidity,
+        volatile_acidity,
+        citric_acid,
+        residual_sugar,
+        chlorides,
+        free_sulfur_dioxide,
+        total_sulfur_dioxide,
+        density,
+        pH,
+        sulphates,
+        alcohol
+    ]])
 
-    prediction = model.predict(input_data)[0]
+    scaled_data = scaler.transform(input_data)
+    prediction = int(model.predict(scaled_data)[0])
 
-    st.success(f"🍾 Predicted Wine Quality: **{prediction} / 10**")
-
-    if prediction >= 7:
+    if prediction == 1:
+        st.success("🍷 Good Quality Wine!")
         st.balloons()
-        st.write("✅ Excellent quality wine!")
-    elif prediction >= 5:
-        st.write("🙂 Average quality wine")
     else:
-        st.write("⚠️ Poor quality wine")
+        st.warning("❌ Lower Quality Wine")
+
+    if hasattr(model, "predict_proba"):
+        probabilities = model.predict_proba(scaled_data)[0]
+        class_list = list(model.classes_)
+        if 1 in class_list:
+            good_probability = probabilities[class_list.index(1)]
+            st.metric(
+                "Estimated Good-Quality Probability",
+                f"{good_probability * 100:.2f}%"
+            )
+
